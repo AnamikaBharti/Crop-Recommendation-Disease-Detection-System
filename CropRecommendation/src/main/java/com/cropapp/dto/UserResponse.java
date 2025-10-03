@@ -6,10 +6,10 @@ import lombok.NoArgsConstructor;
 
 @Data 
 @NoArgsConstructor
-@AllArgsConstructor
+ @AllArgsConstructor
 public class UserResponse {
     private Long id;
+    private String name;
     private String email;
-    private String token;
-    private String message;
+    private String token; // JWT token for login response
 }
