@@ -3,25 +3,16 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import authService from '../services/authService';
 
-const styles = {
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f5f5f5' },
-  card: { width: '400px', padding: '20px', borderRadius: '8px', background: 'white', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' },
-  title: { textAlign: 'center', marginBottom: '20px' },
-  formGroup: { marginBottom: '15px' },
-  label: { display: 'block', marginBottom: '5px' },
-  input: { width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' },
-  button: { width: '100%', padding: '10px', borderRadius: '4px', border: 'none', background: 'green', color: 'white' },
-  error: { color: 'red', marginBottom: '15px' },
-  footer: { textAlign: 'center', marginTop: '10px' },
-};
-
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError(''); // Clear error when user types
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,37 +21,141 @@ const Login = () => {
 
     try {
       const res = await authService.login(formData.email, formData.password);
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data));
+      
+      console.log('Login successful:', res.data);
+
+      // Backend returns {id, name, email, token}
+      const { token, id, name, email } = res.data;
+      
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify({ id, name, email }));
+
       navigate('/dashboard');
     } catch (err) {
-      console.error(err.response);
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      console.error('Login error:', err.response || err);
+      
+      if (err.response) {
+        const { data, status } = err.response;
+        
+        if (status === 401) {
+          setError('Invalid email or password');
+        } else {
+          setError(data.message || data.error || 'Login failed. Please try again.');
+        }
+      } else if (err.request) {
+        setError('Unable to connect to server. Please check your connection.');
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Login</h2>
-        {error && <div style={styles.error}>{error}</div>}
+    <div style={{ 
+      display:'flex', 
+      justifyContent:'center', 
+      alignItems:'center', 
+      minHeight:'100vh', 
+      backgroundColor:'#f5f5f5',
+      padding:'20px'
+    }}>
+      <div style={{ 
+        width:'100%',
+        maxWidth:'400px', 
+        padding:'30px', 
+        borderRadius:'8px', 
+        background:'white', 
+        boxShadow:'0 2px 10px rgba(0,0,0,0.1)' 
+      }}>
+        <h2 style={{ textAlign:'center', marginBottom:'20px', color:'#333' }}>
+          Welcome Back
+        </h2>
+        
+        {error && (
+          <div style={{ 
+            color:'#d32f2f', 
+            backgroundColor:'#ffebee',
+            padding:'12px',
+            borderRadius:'4px',
+            marginBottom:'15px',
+            fontSize:'14px'
+          }}>
+            {error}
+          </div>
+        )}
+        
         <form onSubmit={handleSubmit}>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Email</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} style={styles.input} required />
+          <div style={{ marginBottom:'15px' }}>
+            <label style={{ display:'block', marginBottom:'5px', fontWeight:'500' }}>
+              Email
+            </label>
+            <input 
+              type="email" 
+              name="email" 
+              value={formData.email} 
+              onChange={handleChange} 
+              style={{ 
+                width:'100%', 
+                padding:'10px', 
+                borderRadius:'4px', 
+                border:'1px solid #ccc',
+                fontSize:'14px'
+              }} 
+              required 
+              autoComplete="email"
+            />
           </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Password</label>
-            <input type="password" name="password" value={formData.password} onChange={handleChange} style={styles.input} required />
+          
+          <div style={{ marginBottom:'20px' }}>
+            <label style={{ display:'block', marginBottom:'5px', fontWeight:'500' }}>
+              Password
+            </label>
+            <input 
+              type="password" 
+              name="password" 
+              value={formData.password} 
+              onChange={handleChange} 
+              style={{ 
+                width:'100%', 
+                padding:'10px', 
+                borderRadius:'4px', 
+                border:'1px solid #ccc',
+                fontSize:'14px'
+              }} 
+              required
+              autoComplete="current-password"
+            />
           </div>
-          <button type="submit" style={styles.button} disabled={loading}>
+          
+          <button 
+            type="submit" 
+            style={{ 
+              width:'100%', 
+              padding:'12px', 
+              borderRadius:'4px', 
+              border:'none', 
+              background: loading ? '#ccc' : '#2e7d32', 
+              color:'white',
+              fontSize:'16px',
+              fontWeight:'500',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'background 0.3s'
+            }} 
+            disabled={loading}
+            onMouseOver={(e) => !loading && (e.target.style.background = '#1b5e20')}
+            onMouseOut={(e) => !loading && (e.target.style.background = '#2e7d32')}
+          >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
-        <p style={styles.footer}>
-          Don't have an account? <Link to="/register">Register here</Link>
+        
+        <p style={{ textAlign:'center', marginTop:'20px', color:'#666' }}>
+          Don't have an account?{' '}
+          <Link to="/register" style={{ color:'#2e7d32', textDecoration:'none', fontWeight:'500' }}>
+            Register here
+          </Link>
         </p>
       </div>
     </div>
