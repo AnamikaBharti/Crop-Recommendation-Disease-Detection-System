@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
@@ -27,3 +28,22 @@ function App() {
 }
 
 export default App;
+=======
+import { useState } from 'react'
+
+import './App.css'
+
+function App() {
+ 
+
+  return (
+    <>
+      <h1 class="text-3xl font-bold text-blue-400 underline">
+    Hello world!
+  </h1>
+    </>
+  )
+}
+
+export default App
+>>>>>>> upstream/main
