@@ -1,0 +1,99 @@
+ {
+  "translation": {
+    "welcomeMessage": "Welcome to Farm Support",
+    "cropRecommendation": "Crop Recommendation",
+    "diseaseDetection": "Disease Detection",
+    "language": "Language",
+    "navbar": {
+      "brandName": "Farm Support",
+      "login": "Login"
+    },
+    "common": {
+      "back": "← Back",
+      "autofill": "Auto-fill",
+      "analyzeAgain": "Analyze Again",
+      "backToDashboard": "Back to Dashboard"
+    },
+    "alert": {
+      "autofillSuccess": "✅ Auto-filled with sample soil and weather data.",
+      "fillAllFields": "⚠️ Please fill all fields or use auto-fill.",
+      "analysisComplete": "🌾 Analysis complete! AI recommendations generated."
+    },
+    "recommendation": {
+      "title": "Crop Recommendation",
+      "formTitle": "Soil & Weather Details",
+      "autofillTitle": "Quick Auto-fill",
+      "autofillDesc": "Auto-populate with sample soil and weather data.",
+      "placeholder": "Enter value",
+      "analyzeButton": "Analyze & Get Recommendations"
+    },
+    "formLabels": {
+      "nitrogen": "Nitrogen",
+      "phosphorus": "Phosphorus",
+      "potassium": "Potassium",
+      "ph": "pH Level",
+      "temperature": "Temperature (°C)",
+      "humidity": "Humidity (%)",
+      "rainfall": "Rainfall (mm)",
+      "location": "Location"
+    },
+    "summary": {
+      "title": "Analysis Summary",
+      "basedOn": "Based on soil",
+      "andWeather": "and weather data of",
+      "soilHealth": "Soil Health",
+      "good": "Good",
+      "weather": "Weather",
+      "favorable": "Favorable",
+      "waterNeeds": "Water Needs",
+      "moderate": "Moderate",
+      "bestSeason": "Best Season",
+      "kharif": "Kharif"
+    },
+    "results": {
+      "title": "Recommended Crops",
+      "confidence": "Confidence",
+      "yield": "Expected Yield",
+      "profit": "Profit",
+      "duration": "Duration",
+      "water": "Water"
+    },
+    "recommendations": {
+      "rice": {
+        "crop": "Rice",
+        "description": "Ideal for current soil conditions with high nitrogen content."
+      },
+      "wheat": {
+        "crop": "Wheat",
+        "description": "Good alternative with lower water requirements."
+      },
+      "sugarcane": {
+        "crop": "Sugarcane",
+        "description": "High profit potential but requires significant investment."
+      }
+    },
+    "loginPage": {
+      "brandName": "Farm Support",
+      "brandTagline": "Smart recommendations. Healthy yields.",
+      "login": "Login",
+      "signup": "Sign Up",
+      "email": "Email",
+      "phone": "Phone Number",
+      "password": "Password",
+      "name": "Full Name",
+      "location": "Location",
+      "farmSize": "Farm Size (acres)",
+      "loginBtn": "Login to Dashboard",
+      "signupBtn": "Create Account",
+      "loginDesc": "Access your farming dashboard",
+      "signupDesc": "Join the smart farming community",
+      "hello": "Hello Again!",
+      "welcome": "Welcome back, please enter your details.",
+      "toastLoginSuccess": "Login Successful!",
+      "toastLoginDesc": "Welcome to your farmer dashboard",
+      "toastSignupSuccess": "Account Created!",
+      "toastSignupDesc": "Welcome to the farmer community"
+    }
+  }
+}
+
