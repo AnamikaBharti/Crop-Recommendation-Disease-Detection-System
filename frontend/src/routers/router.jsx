@@ -4,8 +4,10 @@ import { Routes, Route } from 'react-router-dom';
 // 1. Import your main App layout component
 import App from '../App'; 
 import Home from '../pages/home';
-import Login from '../components/login';
-import Recommendation from '../pages/recommendation';
+import Login from '../components/LoginModal';
+import Recommendation from '../pages/Recommendation';
+import DiseaseDetection from '../pages/DiseaseDetection';
+import Dashboard from '../pages/Dashboard';
 
 
 const AppRouter = () => (
@@ -14,7 +16,8 @@ const AppRouter = () => (
       <Route path="/" element={<App />}>
       <Route index element={<Home />} />
       <Route path="/recommendation" element={<Recommendation />} />
-      {/* <Route path="disease-detection" element={<DiseaseDetection />} /> */}
+      <Route path="/detection" element={<DiseaseDetection />} />
+      <Route path="/dashboard" element={<Dashboard />} />
      
     </Route>
 

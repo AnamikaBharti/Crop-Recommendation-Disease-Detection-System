@@ -1,41 +1,82 @@
  {
   "translation": {
-    "welcomeMessage": "Welcome to Farm Support",
-    "cropRecommendation": "Crop Recommendation",
-    "diseaseDetection": "Disease Detection",
-    "language": "Language",
     "navbar": {
-      "brandName": "Farm Support",
-      "login": "Login"
+      "brand": "Farm Support",
+      "cropRecommendation": "Crop Recommendation",
+      "diseaseDetection": "Disease Detection",
+      "login": "Login",
+      "langEN":"English",
+      "langHI":"Hindi"
+    },
+    "banner": {
+      "welcome": "Welcome to <1>Farm Support</1>",
+      "description": "Transform your farming with intelligent crop recommendations, disease detection, and data-driven insights. Join thousands of farmers already using AI to increase their yields."
+    },
+    "loginPage": {
+      "hello": "Hello Again!",
+      "welcome": "Welcome back, please enter your details.",
+      "login": "Login",
+      "signup": "Sign Up",
+      "email": "Email",
+      "phone": "Phone Number",
+      "password": "Password",
+      "name": "Full Name",
+      "location": "Location",
+      "farmSize": "Farm Size (acres)",
+      "loginBtn": "Login to Dashboard",
+      "signupBtn": "Create Account",
+      "loginDesc": "Access your farming dashboard",
+      "signupDesc": "Join the smart farming community",
+      "toastLoginSuccess": "Login Successful!",
+      "toastLoginDesc": "Welcome to your farmer dashboard",
+      "toastSignupSuccess": "Account Created!",
+      "toastSignupDesc": "Welcome to the farmer community"
     },
     "common": {
-      "back": "← Back",
-      "autofill": "Auto-fill",
+      "autofill": "Auto-fill Data",
       "analyzeAgain": "Analyze Again",
-      "backToDashboard": "Back to Dashboard"
+      "backToDashboard": "Back to Dashboard",
+      "backToAnalysis":"Back to Analysis"
     },
     "alert": {
       "autofillSuccess": "✅ Auto-filled with sample soil and weather data.",
       "fillAllFields": "⚠️ Please fill all fields or use auto-fill.",
-      "analysisComplete": "🌾 Analysis complete! AI recommendations generated."
+      "analysisComplete": "🌾 Analysis complete! AI suggestions generated."
+    },
+    "formSections": {
+        "mainTitle": "Soil & Weather Analysis",
+        "mainSubtitle": "Provide soil nutrients and weather conditions for personalized crop suggestions.",
+        "nutrients": "Soil Nutrients (mg/kg)",
+        "ph": "Soil pH Level",
+        "weather": "Weather Conditions",
+        "location": "Farm Location"
     },
     "recommendation": {
-      "title": "Crop Recommendation",
+      "title": "Crop Suggestion",
       "formTitle": "Soil & Weather Details",
       "autofillTitle": "Quick Auto-fill",
       "autofillDesc": "Auto-populate with sample soil and weather data.",
-      "placeholder": "Enter value",
-      "analyzeButton": "Analyze & Get Recommendations"
+      "analyzeButton": "Analyze & Get Suggestions"
     },
     "formLabels": {
-      "nitrogen": "Nitrogen",
-      "phosphorus": "Phosphorus",
-      "potassium": "Potassium",
+      "nitrogen": "Nitrogen (N)",
+      "phosphorus": "Phosphorus (P)",
+      "potassium": "Potassium (K)",
       "ph": "pH Level",
       "temperature": "Temperature (°C)",
       "humidity": "Humidity (%)",
-      "rainfall": "Rainfall (mm)",
+      "rainfall": "Rainfall (mm/year)",
       "location": "Location"
+    },
+    "formPlaceholders": {
+        "nitrogen": "0-100",
+        "phosphorus": "0-100",
+        "potassium": "0-100",
+        "ph": "0.0 - 14.0",
+        "temperature": "15-45",
+        "humidity": "0-100",
+        "rainfall": "200-2000",
+        "location": "City, State, Country"
     },
     "summary": {
       "title": "Analysis Summary",
@@ -49,9 +90,10 @@
       "moderate": "Moderate",
       "bestSeason": "Best Season",
       "kharif": "Kharif"
+
     },
     "results": {
-      "title": "Recommended Crops",
+      "title": "Suggested Crops",
       "confidence": "Confidence",
       "yield": "Expected Yield",
       "profit": "Profit",
@@ -59,40 +101,9 @@
       "water": "Water"
     },
     "recommendations": {
-      "rice": {
-        "crop": "Rice",
-        "description": "Ideal for current soil conditions with high nitrogen content."
-      },
-      "wheat": {
-        "crop": "Wheat",
-        "description": "Good alternative with lower water requirements."
-      },
-      "sugarcane": {
-        "crop": "Sugarcane",
-        "description": "High profit potential but requires significant investment."
-      }
-    },
-    "loginPage": {
-      "brandName": "Farm Support",
-      "brandTagline": "Smart recommendations. Healthy yields.",
-      "login": "Login",
-      "signup": "Sign Up",
-      "email": "Email",
-      "phone": "Phone Number",
-      "password": "Password",
-      "name": "Full Name",
-      "location": "Location",
-      "farmSize": "Farm Size (acres)",
-      "loginBtn": "Login to Dashboard",
-      "signupBtn": "Create Account",
-      "loginDesc": "Access your farming dashboard",
-      "signupDesc": "Join the smart farming community",
-      "hello": "Hello Again!",
-      "welcome": "Welcome back, please enter your details.",
-      "toastLoginSuccess": "Login Successful!",
-      "toastLoginDesc": "Welcome to your farmer dashboard",
-      "toastSignupSuccess": "Account Created!",
-      "toastSignupDesc": "Welcome to the farmer community"
+      "rice": { "crop": "Rice", "confidence": 92, "expectedYield": "4.5 tons/acre", "profit": "₹45,000/acre", "season": "Kharif", "duration": "120-130 days", "waterRequirement": "High", "description": "Ideal for current soil conditions with high nitrogen content." },
+      "wheat": { "crop": "Wheat", "confidence": 88, "expectedYield": "3.8 tons/acre", "profit": "₹38,000/acre", "season": "Rabi", "duration": "110-120 days", "waterRequirement": "Moderate", "description": "Good alternative with lower water requirements." },
+      "sugarcane": { "crop": "Sugarcane", "confidence": 75, "expectedYield": "65 tons/acre", "profit": "₹85,000/acre", "season": "Annual", "duration": "12-18 months", "waterRequirement": "High", "description": "High profit potential but requires significant investment." }
     }
   }
 }
