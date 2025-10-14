@@ -6,7 +6,9 @@
       "diseaseDetection": "Disease Detection",
       "login": "Login",
       "langEN":"English",
-      "langHI":"Hindi"
+      "langHI":"Hindi",
+      "dashboard": "Dashboard",
+    "logout": "Logout"
     },
     "banner": {
       "welcome": "Welcome to <1>Farm Support</1>",
@@ -104,7 +106,105 @@
       "rice": { "crop": "Rice", "confidence": 92, "expectedYield": "4.5 tons/acre", "profit": "₹45,000/acre", "season": "Kharif", "duration": "120-130 days", "waterRequirement": "High", "description": "Ideal for current soil conditions with high nitrogen content." },
       "wheat": { "crop": "Wheat", "confidence": 88, "expectedYield": "3.8 tons/acre", "profit": "₹38,000/acre", "season": "Rabi", "duration": "110-120 days", "waterRequirement": "Moderate", "description": "Good alternative with lower water requirements." },
       "sugarcane": { "crop": "Sugarcane", "confidence": 75, "expectedYield": "65 tons/acre", "profit": "₹85,000/acre", "season": "Annual", "duration": "12-18 months", "waterRequirement": "High", "description": "High profit potential but requires significant investment." }
+    },
+    "diseaseDetection": {
+    "title": "Plant Disease Detection",
+    "uploadTitle": "Upload Plant Image",
+    "uploadSubtitle": "Take a clear photo of the affected leaf for accurate detection",
+    "dropzoneTitle": "Upload Leaf Image",
+    "dropzoneSubtitle": "Supported formats: JPG, PNG, WEBP (Max 10MB)",
+    "chooseImage": "Choose Image",
+    "tip1Title": "Good lighting:",
+    "tip1Text": "Ensure the leaf is well-lit with natural light",
+    "tip2Title": "Clear focus:",
+    "tip2Text": "Keep the leaf in sharp focus without blur",
+    "tip3Title": "Full leaf:",
+    "tip3Text": "Capture the entire affected leaf area",
+    "previewTitle": "Image Preview & Analysis",
+    "analyzing": "Analyzing Image...",
+    "analyzingSubtitle": "AI is examining the leaf for disease symptoms...",
+    "analyzeButton": "Analyze for Diseases",
+    "uploadDifferentButton": "Upload Different Image",
+    "resultsTitle": "Disease Detection Results",
+    "confidence": "Confidence",
+    "symptomsTitle": "Identified Symptoms",
+    "treatmentTitle": "Treatment Recommendations",
+    "treatmentSubtitle": "Follow these methods to control the disease effectively",
+    "estimatedCost": "Estimated Cost:",
+    "preventionTitle": "Prevention for Future",
+    "analyzeAnotherButton": "Analyze Another Image",
+    "alerts": {
+      "fileTooLarge": "Please upload an image smaller than 10MB",
+      "noImage": "Please upload a plant leaf image first",
+      "analysisComplete": "Analysis Complete!"
     }
+  },
+  "resultsdisease": {
+    "lateBlight": {
+      "disease": "Late Blight",
+      "description": "Late blight is a fungal disease that affects potato and tomato plants, causing dark spots on leaves and stems.",
+      "symptoms": [
+        "Dark, water-soaked spots on leaves",
+        "White fungal growth on leaf undersides",
+        "Brown/black lesions on stems",
+        "Rapid wilting in humid conditions"
+      ],
+      "treatments": [
+        {
+          "method": "Fungicide Application",
+          "description": "Apply copper-based fungicide spray every 7-10 days",
+          "urgency": "immediate",
+          "cost": "₹150-200 per treatment"
+        },
+        {
+          "method": "Cultural Control",
+          "description": "Remove affected plant parts and improve air circulation",
+          "urgency": "immediate",
+          "cost": "Labor cost only"
+        },
+        {
+          "method": "Preventive Measures",
+          "description": "Avoid overhead watering and plant resistant varieties",
+          "urgency": "future",
+          "cost": "Variable"
+        }
+      ],
+      "prevention": [
+        "Use certified disease-free seeds",
+        "Maintain proper plant spacing",
+        "Avoid watering leaves directly",
+        "Apply preventive fungicides in monsoon"
+      ]
+    }
+  },
+  "dashboard": {
+    "profileTitle": "Your Profile",
+    "quickActionsTitle": "Quick Actions",
+    "recentActivityTitle": "Recent Activity",
+    "quickActions": {
+      "crop": {
+        "title": "Crop Recommendation",
+        "description": "Get AI-powered crop suggestions"
+      },
+      "disease": {
+        "title": "Disease Detection",
+        "description": "Upload leaf images for analysis"
+      },
+      "soil": {
+        "title": "Soil Analysis",
+        "description": "Check soil health parameters"
+      },
+      "history": {
+        "title": "View History",
+        "description": "See past recommendations"
+      }
+    },
+    "weather": {
+      "temperature": "Temperature",
+      "humidity": "Humidity",
+      "wind": "Wind"
+    }
+  }
   }
 }
 

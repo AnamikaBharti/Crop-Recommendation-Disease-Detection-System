@@ -3,13 +3,16 @@ package com.cropapp.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Builder; 
 
-@Data 
+@Data
+@Builder
 @NoArgsConstructor
  @AllArgsConstructor
-public class UserResponse {
+public class UserProfileResponse {
     private Long id;
     private String name;
     private String email;
+    private String location;
     private String token; // JWT token for login response
 }

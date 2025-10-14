@@ -1,8 +1,10 @@
- import React, { useState } from "react";
+
+
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Leaf, Globe } from "lucide-react";
-// 1. Import NavLink instead of Link
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // 1. Import the useAuth hook
 
 // Custom Button Component (Unchanged)
 const Button = ({ children, className, onClick }) => (
@@ -17,6 +19,8 @@ const Button = ({ children, className, onClick }) => (
 const Navbar = ({ onLoginClick }) => {
   const { t, i18n } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, logout } = useAuth(); // 2. Get auth state and logout function
+  const navigate = useNavigate();
 
   // Custom color definitions (Unchanged)
   const textCream = "text-white";
@@ -27,15 +31,20 @@ const Navbar = ({ onLoginClick }) => {
 
   const navLinks = [
     { to: "/recommendation", labelKey: "navbar.cropRecommendation" },
-    { to: "/detection", labelKey: "navbar.diseaseDetection" },
-     { to: "/dashboard", labelKey: "Dashboard" },
+    { to: "/detection", labelKey: "navbar.diseaseDetection" }
   ];
 
   const handleLanguageChange = (lang) => {
     i18n.changeLanguage(lang);
   };
 
-  // 2. Define base and active styles for NavLinks
+  const handleLogout = () => {
+    logout();
+    setIsMenuOpen(false);
+    navigate('/'); // Redirect to home page after logout
+  };
+
+  // Define base and active styles for NavLinks
   const baseLinkClass = "text-sm font-medium p-2 rounded-md transition-colors duration-200";
   const activeLinkClass = "bg-white/10 text-[#66bb6a] font-semibold";
   const inactiveLinkClass = `${textCream} hover:text-[#4CAF50]`;
@@ -57,7 +66,6 @@ const Navbar = ({ onLoginClick }) => {
             {/* Main Navigation Links */}
             <div className="flex space-x-6">
               {navLinks.map((link) => (
-                // 3. Use NavLink and its className function
                 <NavLink
                   key={link.to}
                   to={link.to}
@@ -73,13 +81,32 @@ const Navbar = ({ onLoginClick }) => {
             {/* Separator */}
             <span className="h-6 w-px bg-white/20"></span>
 
-            {/* Login Button */}
-            <Button
-              onClick={onLoginClick}
-              className={`bg-transparent border border-white/50 ${hoverGreen} ${textCream} text-sm`}
-            >
-              {t("navbar.login")}
-            </Button>
+            {/* 3. Conditional rendering for Login/Dashboard/Logout */}
+            <div className="flex items-center space-x-2">
+              {isAuthenticated ? (
+                <>
+                  <NavLink
+                    to="/dashboard"
+                    className={`${baseLinkClass} ${hoverGreen} ${textCream}`}
+                  >
+                    {t("navbar.dashboard")}
+                  </NavLink>
+                  <Button
+                    onClick={handleLogout}
+                    className={`bg-transparent border border-white/50 ${hoverGreen} ${textCream} text-sm`}
+                  >
+                    {t("navbar.logout")}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={onLoginClick}
+                  className={`bg-transparent border border-white/50 ${hoverGreen} ${textCream} text-sm`}
+                >
+                  {t("navbar.login")}
+                </Button>
+              )}
+            </div>
 
             {/* Language Selector (Unchanged) */}
             <div className="relative group flex items-center cursor-pointer">
@@ -92,17 +119,13 @@ const Navbar = ({ onLoginClick }) => {
               >
                 <button
                   onClick={() => handleLanguageChange("en")}
-                  className={`block w-full text-left px-4 py-2 text-sm text-[#424242] hover:bg-gray-100 ${
-                    i18n.language === "en" ? `${bgGreen} ${textCream} !bg-[#4CAF50]` : ""
-                  }`}
+                  className={`block w-full text-left px-4 py-2 text-sm text-[#424242] hover:bg-gray-100 ${i18n.language === "en" ? `!bg-[#4CAF50] ${textCream}` : ""}`}
                 >
                   {t("navbar.langEN")}
                 </button>
                 <button
                   onClick={() => handleLanguageChange("hi")}
-                  className={`block w-full text-left px-4 py-2 text-sm text-[#424242] hover:bg-gray-100 ${
-                    i18n.language === "hi" ? `${bgGreen} ${textCream} !bg-[#4CAF50]` : ""
-                  }`}
+                  className={`block w-full text-left px-4 py-2 text-sm text-[#424242] hover:bg-gray-100 ${i18n.language === "hi" ? `!bg-[#4CAF50] ${textCream}` : ""}`}
                 >
                   {t("navbar.langHI")}
                 </button>
@@ -115,11 +138,8 @@ const Navbar = ({ onLoginClick }) => {
             className="md:hidden p-2 rounded-md focus:outline-none"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-expanded={isMenuOpen}
-            aria-controls="mobile-menu"
           >
-            <svg
-              className={`h-6 w-6 ${textCream}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"
-            >
+            <svg className={`h-6 w-6 ${textCream}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {isMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               ) : (
@@ -131,39 +151,55 @@ const Navbar = ({ onLoginClick }) => {
       </div>
 
       {/* Mobile Menu Content */}
-      <div
-        id="mobile-menu"
-        className={`md:hidden ${isMenuOpen ? "block" : "hidden"} border-t border-white/10`}
-      >
+      <div id="mobile-menu" className={`md:hidden ${isMenuOpen ? "block" : "hidden"} border-t border-white/10`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
           {navLinks.map((link) => (
-            // 4. Also use NavLink for the mobile menu
             <NavLink
               key={link.to}
               to={link.to}
               onClick={() => setIsMenuOpen(false)}
               className={({ isActive }) =>
-                `block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                  isActive ? activeLinkClass : `${textCream} hover:bg-white/10 hover:text-[#4CAF50]`
-                }`
+                `block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive ? activeLinkClass : `${textCream} hover:bg-white/10 hover:text-[#4CAF50]`}`
               }
             >
               {t(link.labelKey)}
             </NavLink>
           ))}
-          <Button
-            onClick={() => {
-              onLoginClick();
-              setIsMenuOpen(false);
-            }}
-            className={`block w-full px-3 py-2 rounded-md text-base font-medium ${bgGreen} ${hoverGreen} ${textCream} text-center mt-2`}
-          >
-            {t("navbar.login")}
-          </Button>
-        </div>
 
+          {/* 4. Conditional rendering for Mobile Menu */}
+          {isAuthenticated ? (
+            <>
+              <NavLink
+                to="/dashboard"
+                onClick={() => setIsMenuOpen(false)}
+                className={({ isActive }) =>
+                  `block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${isActive ? activeLinkClass : `${textCream} hover:bg-white/10 hover:text-[#4CAF50]`}`
+                }
+              >
+                {t("navbar.dashboard")}
+              </NavLink>
+              <Button
+                onClick={handleLogout}
+                className={`block w-full px-3 py-2 rounded-md text-base font-medium bg-red-500 hover:bg-red-600 ${textCream} text-center mt-2`}
+              >
+                {t("navbar.logout")}
+              </Button>
+            </>
+          ) : (
+            <Button
+              onClick={() => {
+                onLoginClick();
+                setIsMenuOpen(false);
+              }}
+              className={`block w-full px-3 py-2 rounded-md text-base font-medium ${bgGreen} ${hoverGreen} ${textCream} text-center mt-2`}
+            >
+              {t("navbar.login")}
+            </Button>
+          )}
+        </div>
+        
         {/* Mobile Language Selector (Unchanged) */}
-        <div className="px-4 py-3 flex justify-around border-t border-white/10">
+          <div className="px-4 py-3 flex justify-around border-t border-white/10">
           {["en", "hi"].map((lang) => (
             <button
               key={lang}
@@ -185,4 +221,3 @@ const Navbar = ({ onLoginClick }) => {
 };
 
 export default Navbar;
-

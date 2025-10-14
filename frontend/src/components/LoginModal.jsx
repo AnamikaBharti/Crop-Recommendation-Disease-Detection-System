@@ -1,19 +1,14 @@
  // src/components/LoginModal.jsx
-import React, { useState, createContext, useContext } from "react";
+import React, { useEffect, useState, createContext, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { Leaf, Users } from "lucide-react";
-
-// In your actual application, you would use: import { useTranslation } from "react-i18next";
-// For this standalone component, we'll mock it to avoid import errors.
-
-
+import { useAuth } from "../context/AuthContext"; // 1. Import the useAuth hook
 
 // --- API Configuration ---
-// Using a fixed URL to avoid build environment issues with import.meta.env
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 // --- Reusable UI Components (from your provided UI example) ---
 const Button = ({ children, className, ...props }) => (
@@ -76,10 +71,20 @@ const TabsContent = ({ children, value }) => {
 const LoginModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { login } = useAuth(); // 2. Get the login function from the context
 
   // State and handlers from your logic file
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ name: "", email: "", phone: "", location: "", password: "" });
+
+  useEffect(() => {
+    // This function will run every time the 'isOpen' prop changes.
+    if (!isOpen) {
+      // If the modal is closing, reset the form data.
+      setLoginData({ email: "", password: "" });
+      setSignupData({ name: "", email: "", phone: "", location: "", password: "" });
+    }
+  }, [isOpen]);
 
   const handleLoginChange = (e) => setLoginData({ ...loginData, [e.target.name]: e.target.value });
   const handleSignupChange = (e) => setSignupData({ ...signupData, [e.target.name]: e.target.value });
@@ -92,11 +97,12 @@ const LoginModal = ({ isOpen, onClose }) => {
     try {
       const res = await axios.post(`${API_BASE_URL}/api/auth/login`, loginData);
       const { token } = res.data;
+
       if (token) {
-        localStorage.setItem("authToken", token);
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        login(token); // 3. Use the context's login function
       }
-      toast(`${t("loginPage.toastLoginSuccess")} ${t("loginPage.toastLoginDesc")}`);
+      
+      toast(`${t("loginPage.toastLoginSuccess")}`);
       onClose();
       navigate("/dashboard");
     } catch (error) {
@@ -108,10 +114,10 @@ const LoginModal = ({ isOpen, onClose }) => {
     e.preventDefault();
     try {
       await axios.post(`${API_BASE_URL}/api/auth/register`, signupData);
-      toast(`${t("loginPage.toastSignupSuccess")} ${t("loginPage.toastSignupDesc")}`);
-      // In a real app, you might auto-login or just close the modal. 
-      // For now, we'll just close it.
-      onClose();
+      toast(`${t("loginPage.toastSignupSuccess")}`);
+      // Suggest user to log in after successful signup
+      // You could also automatically switch the tab here.
+      alert("Please log in with your new account.");
     } catch (error) {
       toast(error.response?.data?.message || "Signup failed.");
     }
@@ -224,4 +230,3 @@ const LoginModal = ({ isOpen, onClose }) => {
 };
 
 export default LoginModal;
-
