@@ -12,7 +12,7 @@ const DiseaseDetection = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
 
-  // In a real app, this key would come from your API response
+  // In a real app, this key would come from API response
   const [resultKey] = useState("lateBlight"); 
   const [confidence] = useState(87);
 
@@ -145,7 +145,7 @@ const DiseaseDetection = () => {
             <div className="bg-white shadow-md rounded-lg p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                {t('diseaseDetection.resultsdiseaseTitle')}
+                 Disease Detection Result
               </h2>
               <div className="flex gap-6 mb-6">
                 <img src={selectedImage} alt="Analyzed leaf" className="w-32 h-32 object-cover rounded-lg border" />

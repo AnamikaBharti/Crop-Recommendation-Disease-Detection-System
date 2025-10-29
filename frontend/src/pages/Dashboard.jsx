@@ -37,10 +37,10 @@ export default function Dashboard() {
     { label: t('dashboard.weather.wind'), value: "12 km/h", icon: Wind },
   ];
 
-  // This useEffect hook runs once when the component loads
+ 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      // 1. Get the authentication token from local storage
+    
       const token = localStorage.getItem('authToken');
       if (!token) {
         // If there's no token, the user isn't logged in, so redirect them.
@@ -49,41 +49,30 @@ export default function Dashboard() {
       }
 
       try {
-        // 2. Prepare the request headers with the token
+      
         const config = {
           headers: {
             Authorization: `Bearer ${token}`
           }
         };
         const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/user/profile`;
-
-        // 3. Make the API call to the protected endpoint
         const response = await axios.get(API_URL, config);
-        
-        // 4. Save the fetched user data to state
         setUser(response.data);
 
       } catch (error) {
         console.error("Failed to fetch user profile:", error);
-        // If the token is invalid or expired, the API will fail.
-        // Remove the bad token and redirect to the login page.
         localStorage.removeItem('authToken');
         navigate('/login');
       } finally {
-        // 5. Hide the loading screen
         setLoading(false);
       }
     };
 
     fetchUserProfile();
   }, [navigate]);
-
-  // Show a loading message while data is being fetched
   if (loading) {
     return <div className="min-h-screen flex justify-center items-center">{t('dashboard.loading')}</div>;
   }
-
-  // If fetching failed for some reason, show an error.
   if (!user) {
     return <div className="min-h-screen flex justify-center items-center">{t('dashboard.error')}</div>;
   }

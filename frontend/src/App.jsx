@@ -1,7 +1,7 @@
  import React from 'react';
 import { Outlet } from 'react-router-dom'; // 1. Import Outlet
 
-import Footer from './components/footer';
+import Footer from './components/Footer';
 import { useState } from 'react';
 import LoginModal from './components/LoginModal';
 import Navbar from './components/Navbar';

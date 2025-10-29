@@ -2,11 +2,6 @@ import React from 'react';
 import { Mail, MapPin, Leaf, Facebook, Twitter, Linkedin } from "lucide-react";
 import { Link, BrowserRouter as Router } from 'react-router-dom';
 
-// ==========================================================
-// 1. IN-FILE UTILITY COMPONENTS (Replaces external UI imports)
-// ==========================================================
-
-// Custom Button Component
 const Button = ({ children, className, onClick }) => (
   <button 
     className={`px-4 py-2 rounded-lg font-medium transition-colors ${className}`}
@@ -16,7 +11,7 @@ const Button = ({ children, className, onClick }) => (
   </button>
 );
 
-// Custom Input Component
+
 const Input = ({ type, placeholder, className }) => (
   <input
     type={type}
@@ -25,16 +20,11 @@ const Input = ({ type, placeholder, className }) => (
   />
 );
 
-// NOTE: Link is imported from 'react-router-dom'
 
-// ==========================================================
-// 2. MAIN FOOTER COMPONENT
-// ==========================================================
-
-const Footer = () => { // Renamed the main content component
+const Footer = () => { 
   const currentYear = new Date().getFullYear();
   
-  // Custom color definitions based on the requested palette
+
   const textLight = "text-white/90";
   const textCream = "text-white";
   const iconGreen = "text-[#4CAF50]";
@@ -89,7 +79,7 @@ const Footer = () => { // Renamed the main content component
               <div className="flex items-center gap-2">
                 <Mail className={`h-4 w-4 ${iconGreen}`} /> 
                 <a
-                  href="mailto:support@farmsupport.com"
+                  href="mailto:singhtarandeep0655@gmail.com"
                   className={`hover:${textCream} transition-colors`}
                 >
                   support@farmsupport.com
@@ -101,8 +91,6 @@ const Footer = () => { // Renamed the main content component
               </div>
             </div>
           </div>
-
-          {/* Column 2: Quick Links */}
           <div>
             <h4 className={`text-lg font-semibold ${textCream} mb-4`}>
               Quick Links

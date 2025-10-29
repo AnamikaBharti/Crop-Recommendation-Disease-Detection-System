@@ -4,9 +4,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Leaf, Globe } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // 1. Import the useAuth hook
-
-// Custom Button Component (Unchanged)
+import { useAuth } from "../context/AuthContext"; 
 const Button = ({ children, className, onClick }) => (
   <button
     className={`px-4 py-2 rounded-lg font-medium transition-colors ${className}`}
@@ -19,10 +17,9 @@ const Button = ({ children, className, onClick }) => (
 const Navbar = ({ onLoginClick }) => {
   const { t, i18n } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isAuthenticated, logout } = useAuth(); // 2. Get auth state and logout function
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Custom color definitions (Unchanged)
   const textCream = "text-white";
   const iconGreen = "text-[#4CAF50]";
   const bgTeal = "bg-[#004D40]";
@@ -44,7 +41,7 @@ const Navbar = ({ onLoginClick }) => {
     navigate('/'); // Redirect to home page after logout
   };
 
-  // Define base and active styles for NavLinks
+  
   const baseLinkClass = "text-sm font-medium p-2 rounded-md transition-colors duration-200";
   const activeLinkClass = "bg-white/10 text-[#66bb6a] font-semibold";
   const inactiveLinkClass = `${textCream} hover:text-[#4CAF50]`;
@@ -63,7 +60,7 @@ const Navbar = ({ onLoginClick }) => {
 
           {/* Desktop Navigation & Utility (Right Aligned) */}
           <div className="hidden md:flex items-center space-x-6">
-            {/* Main Navigation Links */}
+         
             <div className="flex space-x-6">
               {navLinks.map((link) => (
                 <NavLink
@@ -78,7 +75,6 @@ const Navbar = ({ onLoginClick }) => {
               ))}
             </div>
 
-            {/* Separator */}
             <span className="h-6 w-px bg-white/20"></span>
 
             {/* 3. Conditional rendering for Login/Dashboard/Logout */}
@@ -87,7 +83,9 @@ const Navbar = ({ onLoginClick }) => {
                 <>
                   <NavLink
                     to="/dashboard"
-                    className={`${baseLinkClass} ${hoverGreen} ${textCream}`}
+                   className={({ isActive }) =>
+                    `${baseLinkClass} ${isActive ? activeLinkClass : inactiveLinkClass}`
+                  }
                   >
                     {t("navbar.dashboard")}
                   </NavLink>

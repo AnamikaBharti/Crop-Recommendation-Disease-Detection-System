@@ -6,20 +6,16 @@ import {
   Sun, Calendar, DollarSign, Wheat, Award, RefreshCw
 } from "lucide-react";
 
-// --- Style block is unchanged ---
+
 const customStyles = `
   input[type='number']::-webkit-outer-spin-button,
   input[type='number']::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   input[type='number'] { -moz-appearance: textfield; }
 `;
 
-// --- Reusable UI Components are unchanged ---
 const Label = ({ children, ...props }) => ( <label className="text-sm font-medium text-gray-600 block mb-1" {...props}>{children}</label> );
 const Input = (props) => ( <input className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition-all shadow-sm" {...props} /> );
 
-// ===================================================================
-// 1. THE FIX: Create a mapping for dynamic Tailwind classes
-// ===================================================================
 const colorClasses = {
   green: {
     bg: 'bg-green-50',
@@ -49,7 +45,7 @@ const colorClasses = {
 
 const Recommendation = () => {
   const { t } = useTranslation();
-  // --- All state and handlers remain the same ---
+ 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     nitrogen: "", phosphorus: "", potassium: "", ph: "",
@@ -87,7 +83,7 @@ const Recommendation = () => {
       <style>{customStyles}</style>
       <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
         <AnimatePresence mode="wait">
-          {/* Step 1 Form (Unchanged) */}
+        
           {step === 1 && (
             <motion.div
               key="form"
@@ -95,7 +91,6 @@ const Recommendation = () => {
               transition={{ duration: 0.5 }}
               className="max-w-4xl mx-auto bg-white text-gray-800 p-8 rounded-2xl shadow-lg border border-gray-200"
             >
-              {/* All form content is the same */}
                  <div className="text-center mb-8">
                 <h1 className="text-4xl font-bold text-gray-800">{t('formSections.mainTitle')}</h1>
                 <p className="text-gray-500 mt-2 text-lg">{t('formSections.mainSubtitle')}</p>
@@ -167,7 +162,7 @@ const Recommendation = () => {
             </motion.div>
           )}
 
-          {/* Step 2 Results (Updated with fix) */}
+        
           {step === 2 && (
             <motion.div
               key="results"
@@ -181,7 +176,6 @@ const Recommendation = () => {
                   {t('summary.basedOn')} (N:{formData.nitrogen}, P:{formData.phosphorus}, K:{formData.potassium}, pH:{formData.ph}) {t('summary.andWeather')} {formData.location}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {/* The SummaryCard component now uses the color map */}
                   <SummaryCard icon={<Wheat className="text-green-700"/>} title={t('summary.soilHealth')} value={t('summary.good')} color="green" />
                   <SummaryCard icon={<Sun className="text-blue-700"/>} title={t('summary.weather')} value={t('summary.favorable')} color="blue" />
                   <SummaryCard icon={<Droplets className="text-yellow-700"/>} title={t('summary.waterNeeds')} value={t('summary.moderate')} color="yellow" />
@@ -218,7 +212,6 @@ const Recommendation = () => {
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4 mt-6 text-center">
-                        {/* The StatCard component now uses the color map */}
                         <StatCard icon={<Wheat className="text-green-700"/>} title={t('results.yield')} value={rec.expectedYield} color="green" />
                         <StatCard icon={<DollarSign className="text-yellow-700"/>} title={t('results.profit')} value={rec.profit} color="yellow" />
                         <StatCard icon={<Calendar className="text-blue-700"/>} title={t('results.duration')} value={rec.duration} color="blue" />
@@ -256,7 +249,7 @@ const FormSection = ({ icon, title, children }) => (
 );
 
 const SummaryCard = ({ icon, title, value, color }) => {
-  const classes = colorClasses[color] || colorClasses.green; // Fallback to green
+  const classes = colorClasses[color] || colorClasses.green; 
   return (
     <div className={`${classes.bg} p-4 rounded-lg text-center flex flex-col items-center justify-center border ${classes.border}`}>
       <div className="mb-2">{icon}</div>
@@ -267,7 +260,7 @@ const SummaryCard = ({ icon, title, value, color }) => {
 };
 
 const StatCard = ({ icon, title, value, color }) => {
-  const classes = colorClasses[color] || colorClasses.green; // Fallback to green
+  const classes = colorClasses[color] || colorClasses.green; 
   return (
     <div className={`${classes.bg} p-4 rounded-lg`}>
       <div className="flex items-center justify-center gap-2 mb-1">

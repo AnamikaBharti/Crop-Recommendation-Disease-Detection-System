@@ -1,16 +1,14 @@
- // src/components/LoginModal.jsx
 import React, { useEffect, useState, createContext, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { Leaf, Users } from "lucide-react";
-import { useAuth } from "../context/AuthContext"; // 1. Import the useAuth hook
+import { useAuth } from "../context/AuthContext";
 
 // --- API Configuration ---
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
-// --- Reusable UI Components (from your provided UI example) ---
 const Button = ({ children, className, ...props }) => (
   <button className={`px-4 py-2 rounded-md transition-colors ${className}`} {...props}>
     {children}
@@ -67,20 +65,17 @@ const TabsContent = ({ children, value }) => {
   return activeTab === value ? <div>{children}</div> : null;
 };
 
-// --- Main LoginModal Component ---
 const LoginModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { login } = useAuth(); // 2. Get the login function from the context
+  const { login } = useAuth();
 
-  // State and handlers from your logic file
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ name: "", email: "", phone: "", location: "", password: "" });
 
   useEffect(() => {
-    // This function will run every time the 'isOpen' prop changes.
+   
     if (!isOpen) {
-      // If the modal is closing, reset the form data.
       setLoginData({ email: "", password: "" });
       setSignupData({ name: "", email: "", phone: "", location: "", password: "" });
     }
@@ -89,7 +84,6 @@ const LoginModal = ({ isOpen, onClose }) => {
   const handleLoginChange = (e) => setLoginData({ ...loginData, [e.target.name]: e.target.value });
   const handleSignupChange = (e) => setSignupData({ ...signupData, [e.target.name]: e.target.value });
 
-  // Simple alert-based toast for notifications
   const toast = (msg) => window.alert(msg);
 
   const handleLogin = async (e) => {
@@ -99,7 +93,7 @@ const LoginModal = ({ isOpen, onClose }) => {
       const { token } = res.data;
 
       if (token) {
-        login(token); // 3. Use the context's login function
+        login(token);
       }
       
       toast(`${t("loginPage.toastLoginSuccess")}`);
@@ -115,8 +109,6 @@ const LoginModal = ({ isOpen, onClose }) => {
     try {
       await axios.post(`${API_BASE_URL}/api/auth/register`, signupData);
       toast(`${t("loginPage.toastSignupSuccess")}`);
-      // Suggest user to log in after successful signup
-      // You could also automatically switch the tab here.
       alert("Please log in with your new account.");
     } catch (error) {
       toast(error.response?.data?.message || "Signup failed.");
