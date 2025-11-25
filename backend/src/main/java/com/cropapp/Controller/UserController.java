@@ -3,7 +3,7 @@ package com.cropapp.Controller;
 
 import com.cropapp.model.User;
 import com.cropapp.repository.UserRepository;
-import com.cropapp.dto.UserProfileResponse;
+import com.cropapp.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -22,7 +22,7 @@ public class UserController {
     private final UserRepository userRepository;
 
     @GetMapping("/profile")
-    public ResponseEntity<UserProfileResponse> getCurrentUserProfile() {
+    public ResponseEntity<UserResponse> getCurrentUserProfile() {
         // This gets the user's email from the security context (via the token)
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userEmail = authentication.getName();
@@ -31,7 +31,7 @@ public class UserController {
                 .orElseThrow(() -> new RuntimeException("User not found for email: " + userEmail));
 
         // Build the response object without the 'area' field
-        UserProfileResponse profile = UserProfileResponse.builder()
+        UserResponse profile = UserResponse.builder()
                 .name(user.getName())
                 .location(user.getLocation())
                 .build();

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
+import axios from "axios"; // ✅ Import Axios
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Beaker, Leaf, MapPin, Droplets, Thermometer, CloudRain,
-  Sun, Calendar, DollarSign, Wheat, Award, RefreshCw
+  Sun, Calendar, DollarSign, Wheat, Award, RefreshCw, Loader2 // Added Loader icon
 } from "lucide-react";
-
 
 const customStyles = `
   input[type='number']::-webkit-outer-spin-button,
@@ -17,42 +17,28 @@ const Label = ({ children, ...props }) => ( <label className="text-sm font-mediu
 const Input = (props) => ( <input className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none transition-all shadow-sm" {...props} /> );
 
 const colorClasses = {
-  green: {
-    bg: 'bg-green-50',
-    text: 'text-green-700',
-    border: 'border-green-200',
-    valueText: 'text-green-800'
-  },
-  blue: {
-    bg: 'bg-blue-50',
-    text: 'text-blue-700',
-    border: 'border-blue-200',
-    valueText: 'text-blue-800'
-  },
-  yellow: {
-    bg: 'bg-yellow-50',
-    text: 'text-yellow-700',
-    border: 'border-yellow-200',
-    valueText: 'text-yellow-800'
-  },
-  pink: {
-    bg: 'bg-pink-50',
-    text: 'text-pink-700',
-    border: 'border-pink-200',
-    valueText: 'text-pink-800'
-  }
+  green: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', valueText: 'text-green-800' },
+  blue: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', valueText: 'text-blue-800' },
+  yellow: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', valueText: 'text-yellow-800' },
+  pink: { bg: 'bg-pink-50', text: 'text-pink-700', border: 'border-pink-200', valueText: 'text-pink-800' }
 };
 
 const Recommendation = () => {
   const { t } = useTranslation();
- 
+  
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     nitrogen: "", phosphorus: "", potassium: "", ph: "",
     temperature: "", humidity: "", rainfall: "", location: "",
   });
-  const recommendationKeys = ["rice", "wheat", "sugarcane"];
+
+  // ✅ New State for API Data
+  const [apiResult, setApiResult] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const handleInputChange = (field, value) => { setFormData((prev) => ({ ...prev, [field]: value })); };
+  
   const handleAutoFill = () => {
     setFormData({
       nitrogen: "90", phosphorus: "42", potassium: "43", ph: "6.5",
@@ -60,18 +46,61 @@ const Recommendation = () => {
     });
     alert(t('alert.autofillSuccess'));
   };
-  const handleAnalyze = () => {
+
+  // ✅ Updated Analyze Function to Call Java API
+  const handleAnalyze = async () => {
     if (Object.values(formData).some((value) => !value)) {
       alert(t('alert.fillAllFields'));
       return;
     }
-    setStep(2);
+
+    setLoading(true);
+    setError("");
+
+    try {
+      // Map frontend state names to backend DTO names (N, P, K)
+      const payload = {
+        N: parseInt(formData.nitrogen),
+        P: parseInt(formData.phosphorus),
+        K: parseInt(formData.potassium),
+        temperature: parseFloat(formData.temperature),
+        humidity: parseFloat(formData.humidity),
+        ph: parseFloat(formData.ph),
+        rainfall: parseFloat(formData.rainfall)
+      };
+
+     // 1. Check for Token
+      const token = localStorage.getItem("authToken");
+
+      // 2. Prepare Config
+      const config = {};
+      if (token) {
+        config.headers = { Authorization: `Bearer ${token}` };
+      }
+
+      // 3. Send Request with Config
+      const response = await axios.post("http://localhost:8080/api/recommend", payload, config);
+      
+      // Set the real data from backend
+      setApiResult(response.data.top_crops); 
+      setStep(2);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to connect to server. Please check if backend is running.");
+      alert("Error connecting to server!");
+    } finally {
+      setLoading(false);
+    }
   };
-  const getConfidenceColor = (confidence) => {
+
+  const getConfidenceColor = (confidenceStr) => {
+    // Remove '%' and convert to number
+    const confidence = parseFloat(confidenceStr.replace('%', ''));
     if (confidence >= 85) return "bg-green-100 text-green-800 border-green-300";
-    if (confidence >= 70) return "bg-yellow-100 text-yellow-800 border-yellow-300";
+    if (confidence >= 50) return "bg-yellow-100 text-yellow-800 border-yellow-300"; // Adjusted threshold
     return "bg-red-100 text-red-800 border-red-300";
   };
+
   const pageVariants = {
     initial: { opacity: 0, y: 20 },
     in: { opacity: 1, y: 0 },
@@ -155,9 +184,16 @@ const Recommendation = () => {
 
               <button
                 onClick={handleAnalyze}
-                className="w-full mt-10 py-3 rounded-lg font-semibold text-lg bg-[#004D40] text-white hover:bg-teal-800 transition-colors shadow-md"
+                disabled={loading} // Disable while loading
+                className="w-full mt-10 py-3 rounded-lg font-semibold text-lg bg-[#004D40] text-white hover:bg-teal-800 transition-colors shadow-md flex justify-center items-center gap-2 disabled:opacity-70"
               >
-                {t('recommendation.analyzeButton')}
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin" /> Analyzing...
+                  </>
+                ) : (
+                  t('recommendation.analyzeButton')
+                )}
               </button>
             </motion.div>
           )}
@@ -184,9 +220,24 @@ const Recommendation = () => {
               </div>
 
               <h2 className="text-4xl font-bold mb-8 text-center text-gray-800">{t('results.title')}</h2>
+              
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {recommendationKeys.map((key, i) => {
-                  const rec = t(`recommendations.${key}`, { returnObjects: true });
+                {/* ✅ Use Real API Results here */}
+                {apiResult.map((resultItem, i) => {
+                  // We use the crop name from API (e.g., "rice") to find translation
+                  const cropKey = resultItem.crop.toLowerCase();
+                  const rec = t(`recommendations.${cropKey}`, { returnObjects: true });
+                  
+                  // Fallback if translation is missing for a specific crop
+                  const displayRec = rec && rec.crop ? rec : {
+                    crop: resultItem.crop,
+                    description: "Optimized for your soil conditions.",
+                    expectedYield: "High",
+                    profit: "High",
+                    duration: "Standard",
+                    waterRequirement: "Medium"
+                  };
+
                   return (
                     <motion.div
                       key={i}
@@ -203,19 +254,20 @@ const Recommendation = () => {
                       
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="text-2xl font-bold">{rec.crop}</h3>
-                          <p className="text-gray-600 text-sm mt-1">{rec.description}</p>
+                          <h3 className="text-2xl font-bold capitalize">{displayRec.crop}</h3>
+                          <p className="text-gray-600 text-sm mt-1">{displayRec.description}</p>
                         </div>
-                        <div className={`text-sm font-semibold px-3 py-1.5 rounded-full border ${getConfidenceColor(rec.confidence)}`}>
-                          {rec.confidence}%
+                        {/* Use confidence from API */}
+                        <div className={`text-sm font-semibold px-3 py-1.5 rounded-full border ${getConfidenceColor(resultItem.confidence)}`}>
+                          {resultItem.confidence}
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4 mt-6 text-center">
-                        <StatCard icon={<Wheat className="text-green-700"/>} title={t('results.yield')} value={rec.expectedYield} color="green" />
-                        <StatCard icon={<DollarSign className="text-yellow-700"/>} title={t('results.profit')} value={rec.profit} color="yellow" />
-                        <StatCard icon={<Calendar className="text-blue-700"/>} title={t('results.duration')} value={rec.duration} color="blue" />
-                        <StatCard icon={<Droplets className="text-pink-700"/>} title={t('results.water')} value={rec.waterRequirement} color="pink" />
+                        <StatCard icon={<Wheat className="text-green-700"/>} title={t('results.yield')} value={displayRec.expectedYield} color="green" />
+                        <StatCard icon={<DollarSign className="text-yellow-700"/>} title={t('results.profit')} value={displayRec.profit} color="yellow" />
+                        <StatCard icon={<Calendar className="text-blue-700"/>} title={t('results.duration')} value={displayRec.duration} color="blue" />
+                        <StatCard icon={<Droplets className="text-pink-700"/>} title={t('results.water')} value={displayRec.waterRequirement} color="pink" />
                       </div>
                     </motion.div>
                   )
@@ -273,4 +325,3 @@ const StatCard = ({ icon, title, value, color }) => {
 };
 
 export default Recommendation;
-

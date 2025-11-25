@@ -1,4 +1,5 @@
- import { useState, useRef } from "react";
+import { useState, useRef } from "react";
+import axios from "axios"; // ✅ Import Axios
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft, Camera, Upload, Leaf, AlertTriangle,
@@ -6,24 +7,41 @@ import {
 } from "lucide-react";
 
 const DiseaseDetection = () => {
-  const { t, i18n} = useTranslation();
+  const { t } = useTranslation();
   const fileInputRef = useRef(null);
-  const [selectedImage, setSelectedImage] = useState(null);
+  
+  const [selectedImage, setSelectedImage] = useState(null); // For Preview
+  const [selectedFile, setSelectedFile] = useState(null);   // ✅ For API Upload
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
 
-  // In a real app, this key would come from API response
-  const [resultKey] = useState("lateBlight"); 
-  const [confidence] = useState(87);
+  // ✅ Store Real API Data here
+  const [apiResult, setApiResult] = useState({
+    disease: "",
+    confidence: "",
+    confidenceValue: 0 // Numeric value for logic
+  });
 
-  // Fetch translated data based on the result key
-  const detectionResult = {
-    disease: t(`resultsdisease.${resultKey}.disease`),
-    description: t(`resultsdisease.${resultKey}.description`),
-    symptoms: t(`resultsdisease.${resultKey}.symptoms`, { returnObjects: true }),
-    treatments: t(`resultsdisease.${resultKey}.treatments`, { returnObjects: true }),
-    prevention: t(`resultsdisease.${resultKey}.prevention`, { returnObjects: true }),
+  // Helper to safely get arrays (returns empty array if translation missing)
+  const getSafeList = (key) => {
+    const result = t(key, { returnObjects: true });
+    return Array.isArray(result) ? result : [];
   };
+
+  // ✅ Dynamic Result Object
+  // 1. Uses RAW data from API for Name & Confidence
+  // 2. Tries to find Symptoms/Treatments in translation file using the API disease name
+  const detectionResult = analysisComplete ? {
+    disease: apiResult.disease, // Raw from API
+    
+    // Try to find description in i18n, fallback to generic message
+    description: t(`resultsdisease.${apiResult.disease}.description`, "Detailed analysis based on leaf patterns."),
+    
+    // Try to find arrays in i18n, fallback to empty list
+    symptoms: getSafeList(`resultsdisease.${apiResult.disease}.symptoms`),
+    treatments: getSafeList(`resultsdisease.${apiResult.disease}.treatments`),
+    prevention: getSafeList(`resultsdisease.${apiResult.disease}.prevention`),
+  } : {};
 
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
@@ -32,6 +50,8 @@ const DiseaseDetection = () => {
         alert(t("diseaseDetection.alerts.fileTooLarge"));
         return;
       }
+      setSelectedFile(file); // ✅ Save file for API
+      
       const reader = new FileReader();
       reader.onload = (e) => {
         setSelectedImage(e.target.result);
@@ -41,27 +61,62 @@ const DiseaseDetection = () => {
     }
   };
 
-  const handleAnalyze = () => {
-    if (!selectedImage) {
+  const handleAnalyze = async () => {
+    if (!selectedFile) {
       alert(t("diseaseDetection.alerts.noImage"));
       return;
     }
+
     setIsAnalyzing(true);
-    setTimeout(() => {
-      setIsAnalyzing(false);
+
+    try {
+      // ✅ Create Form Data
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      // 1. Check if user is logged in
+      const token = localStorage.getItem("authToken"); 
+      
+      // 2. Prepare Headers
+      const headers = { 
+        "Content-Type": "multipart/form-data" 
+      };
+
+      // 3. If token exists, attach it!
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+    const response = await axios.post("http://localhost:8080/api/detect", formData, {
+        headers: headers // Pass the dynamic headers
+      });
+
+      // ✅ Parse Response
+      // API returns: { "disease": "Tomato___Early_Blight", "confidence": "98.5%" }
+      const rawConf = response.data.confidence;
+      const numConf = parseFloat(rawConf.replace('%', ''));
+
+      setApiResult({
+        disease: response.data.disease,
+        confidence: rawConf,
+        confidenceValue: numConf
+      });
+
       setAnalysisComplete(true);
       alert(t("diseaseDetection.alerts.analysisComplete"));
-    }, 3000);
+
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      alert("Analysis failed. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const getUrgencyIcon = (urgency) => {
     switch (urgency) {
-      case "immediate":
-        return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      case "soon":
-        return <Info className="h-4 w-4 text-blue-500" />;
-      default:
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case "immediate": return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      case "soon": return <Info className="h-4 w-4 text-blue-500" />;
+      default: return <CheckCircle className="h-4 w-4 text-green-500" />;
     }
   };
 
@@ -142,6 +197,7 @@ const DiseaseDetection = () => {
 
         {analysisComplete && (
           <div className="space-y-6">
+            {/* --- RESULT CARD --- */}
             <div className="bg-white shadow-md rounded-lg p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-500" />
@@ -151,69 +207,83 @@ const DiseaseDetection = () => {
                 <img src={selectedImage} alt="Analyzed leaf" className="w-32 h-32 object-cover rounded-lg border" />
                 <div className="flex-1">
                   <div className="flex items-center gap-4 mb-3">
+                    {/* ✅ RAW API DATA DISPLAYED HERE */}
                     <h3 className="text-2xl font-bold text-red-600">{detectionResult.disease}</h3>
-                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-sm">
-                      {confidence}% {t('diseaseDetection.confidence')}
+                    <span className={`px-2 py-1 rounded text-sm ${apiResult.confidenceValue > 80 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      {detectionResult.confidence || apiResult.confidence} {t('diseaseDetection.confidence')}
                     </span>
                   </div>
                   <p className="text-gray-600 mb-4">{detectionResult.description}</p>
                 </div>
               </div>
-              <h4 className="font-medium mb-3 flex items-center gap-2">
-                <Info className="h-4 w-4 text-blue-500" /> {t('diseaseDetection.symptomsTitle')}
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {detectionResult.symptoms.map((symptom, index) => (
-                  <div key={index} className="flex items-center gap-2 p-2 bg-green-50 rounded">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-sm">{symptom}</span>
+
+              {/* --- SYMPTOMS (Only shows if translation exists) --- */}
+              {detectionResult.symptoms.length > 0 && (
+                <>
+                  <h4 className="font-medium mb-3 flex items-center gap-2">
+                    <Info className="h-4 w-4 text-blue-500" /> {t('diseaseDetection.symptomsTitle')}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {detectionResult.symptoms.map((symptom, index) => (
+                      <div key={index} className="flex items-center gap-2 p-2 bg-green-50 rounded">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm">{symptom}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </>
+              )}
             </div>
 
-            <div className="bg-white shadow-md rounded-lg p-6">
-              <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <Zap className="h-5 w-5 text-green-600" />
-                {t('diseaseDetection.treatmentTitle')}
-              </h2>
-              <p className="text-gray-600 mb-4">{t('diseaseDetection.treatmentSubtitle')}</p>
-              <div className="space-y-4">
-                {detectionResult.treatments.map((treatment, i) => (
-                  <div key={i} className="border-l-4 border-green-500 bg-gray-50 p-4 rounded">
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-medium flex items-center gap-2">
-                        {getUrgencyIcon(treatment.urgency)} {treatment.method}
-                      </h4>
-                      <span className="text-sm bg-gray-200 px-2 py-1 rounded capitalize">{treatment.urgency}</span>
+            {/* --- TREATMENTS (Only shows if translation exists) --- */}
+            {detectionResult.treatments.length > 0 && (
+              <div className="bg-white shadow-md rounded-lg p-6">
+                <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-green-600" />
+                  {t('diseaseDetection.treatmentTitle')}
+                </h2>
+                <p className="text-gray-600 mb-4">{t('diseaseDetection.treatmentSubtitle')}</p>
+                <div className="space-y-4">
+                  {detectionResult.treatments.map((treatment, i) => (
+                    <div key={i} className="border-l-4 border-green-500 bg-gray-50 p-4 rounded">
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-medium flex items-center gap-2">
+                          {getUrgencyIcon(treatment.urgency)} {treatment.method}
+                        </h4>
+                        <span className="text-sm bg-gray-200 px-2 py-1 rounded capitalize">{treatment.urgency}</span>
+                      </div>
+                      <p className="text-gray-600 mb-2">{treatment.description}</p>
+                      <div className="text-sm text-gray-700">
+                        <strong>{t('diseaseDetection.estimatedCost')}</strong> {treatment.cost}
+                      </div>
                     </div>
-                    <p className="text-gray-600 mb-2">{treatment.description}</p>
-                    <div className="text-sm text-gray-700">
-                      <strong>{t('diseaseDetection.estimatedCost')}</strong> {treatment.cost}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className="bg-white shadow-md rounded-lg p-6">
-              <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                <Shield className="h-5 w-5 text-blue-600" /> {t('diseaseDetection.preventionTitle')}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {detectionResult.prevention.map((tip, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                    <Shield className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm">{tip}</span>
-                  </div>
-                ))}
+            {/* --- PREVENTION (Only shows if translation exists) --- */}
+            {detectionResult.prevention.length > 0 && (
+              <div className="bg-white shadow-md rounded-lg p-6">
+                <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-blue-600" /> {t('diseaseDetection.preventionTitle')}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {detectionResult.prevention.map((tip, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                      <Shield className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm">{tip}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="flex gap-4 justify-center">
               <button
                 onClick={() => {
                   setSelectedImage(null);
+                  setSelectedFile(null);
                   setAnalysisComplete(false);
                 }}
                 className="border border-teal-300 shadow-md px-4 py-2 rounded hover:bg-gray-50"

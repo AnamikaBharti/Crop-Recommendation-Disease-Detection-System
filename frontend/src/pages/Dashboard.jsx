@@ -1,64 +1,46 @@
- import React, { useState, useEffect } from "react";
+// 
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import {
   Leaf, MapPin, Thermometer, Droplets, Wind, Wheat,
-  Camera, Beaker, History, Activity,
+  Camera, Beaker, History, Activity, ArrowLeft
 } from "lucide-react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  // State to hold dynamic data fetched from the backend
+  // --- STATE ---
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // History State
+  const [historyData, setHistoryData] = useState([]);
+  const [viewMode, setViewMode] = useState('recent'); // 'recent' or 'history'
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
-  // This data will eventually come from another backend endpoint.
-  // For now, it remains hardcoded.
-  const recentActivity = [
-    { type: "crop", title: "Wheat Recommendation", date: "2 days ago", result: "92% success rate predicted" },
-    { type: "disease", title: "Leaf Spot Detection", date: "1 week ago", result: "Treatment suggested: Copper fungicide" },
-    { type: "crop", title: "Sugarcane Analysis", date: "2 weeks ago", result: "High yield potential identified" },
-  ];
+  // --- API CONFIG ---
+  // Use the env variable correctly
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
-  // UI data arrays are defined inside the component to use the 't' function
-  const quickActions = [
-    { title: t('dashboard.quickActions.crop.title'), description: t('dashboard.quickActions.crop.description'), icon: Wheat, action: () => navigate("/recommendation"), bg: "bg-green-50", textColor: "green-800", iconColor: "green-600" },
-    { title: t('dashboard.quickActions.disease.title'), description: t('dashboard.quickActions.disease.description'), icon: Camera, action: () => navigate("/detection"), bg: "bg-yellow-50", textColor: "yellow-800", iconColor: "yellow-500" },
-    { title: t('dashboard.quickActions.soil.title'), description: t('dashboard.quickActions.soil.description'), icon: Beaker, action: () => navigate("/soil-analysis"), bg: "bg-blue-50", textColor: "blue-800", iconColor: "blue-600" },
-    { title: t('dashboard.quickActions.history.title'), description: t('dashboard.quickActions.history.description'), icon: History, action: () => navigate("/history"), bg: "bg-pink-50", textColor: "red-700", iconColor: "red-500" },
-  ];
-
-  const weatherData = [
-    { label: t('dashboard.weather.temperature'), value: "28°C", icon: Thermometer },
-    { label: t('dashboard.weather.humidity'), value: "65%", icon: Droplets },
-    { label: t('dashboard.weather.wind'), value: "12 km/h", icon: Wind },
-  ];
-
- 
+  // --- FETCH USER PROFILE ---
   useEffect(() => {
     const fetchUserProfile = async () => {
-    
       const token = localStorage.getItem('authToken');
       if (!token) {
-        // If there's no token, the user isn't logged in, so redirect them.
         navigate('/login');
         return;
       }
 
       try {
-      
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        };
-        const API_URL = `${import.meta.env.VITE_API_BASE_URL}/api/user/profile`;
-        const response = await axios.get(API_URL, config);
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        const response = await axios.get(`${API_BASE}/api/user/profile`, config);
         setUser(response.data);
-
+        
+        // Fetch history immediately after user is confirmed
+        fetchHistory(token);
       } catch (error) {
         console.error("Failed to fetch user profile:", error);
         localStorage.removeItem('authToken');
@@ -70,6 +52,91 @@ export default function Dashboard() {
 
     fetchUserProfile();
   }, [navigate]);
+
+  // --- FETCH HISTORY ---
+  const fetchHistory = async (token) => {
+    setLoadingHistory(true);
+    try {
+      const response = await axios.get(`${API_BASE}/api/history`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setHistoryData(response.data);
+    } catch (error) {
+      console.error("Failed to fetch history", error);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  // --- TOGGLE FUNCTION ---
+  const toggleHistoryView = () => {
+    if (viewMode === 'recent') {
+      setViewMode('history');
+      // Re-fetch to ensure latest data when expanding
+      const token = localStorage.getItem('authToken');
+      if(token) fetchHistory(token);
+    } else {
+      setViewMode('recent');
+    }
+  };
+
+  // --- HELPER: Format History Item ---
+  const getHistoryItemDisplay = (item) => {
+    // Backend returns: { type: "CROP" or "DISEASE", result: "Rice", timestamp: "..." }
+    const isCrop = item.type === "CROP";
+    return {
+      title: isCrop ? "Crop Recommendation" : "Disease Detection",
+      result: item.result,
+      date: new Date(item.timestamp).toLocaleDateString(),
+      icon: isCrop ? Wheat : Leaf,
+      bg: isCrop ? "bg-green-600" : "bg-yellow-500"
+    };
+  };
+
+  // --- DATA PREPARATION ---
+  // If viewMode is 'recent', take top 3. If 'history', take all.
+  const displayedActivity = viewMode === 'recent' ? historyData.slice(0, 3) : historyData;
+
+  // --- STATIC DATA (Weather) ---
+  const weatherData = [
+    { label: t('dashboard.weather.temperature'), value: "28°C", icon: Thermometer },
+    { label: t('dashboard.weather.humidity'), value: "65%", icon: Droplets },
+    { label: t('dashboard.weather.wind'), value: "12 km/h", icon: Wind },
+  ];
+
+  // --- QUICK ACTIONS ---
+  const quickActions = [
+    { 
+      title: t('dashboard.quickActions.crop.title'), 
+      description: t('dashboard.quickActions.crop.description'), 
+      icon: Wheat, 
+      action: () => navigate("/recommendation"), 
+      bg: "bg-green-50", textColor: "green-800", iconColor: "green-600" 
+    },
+    { 
+      title: t('dashboard.quickActions.disease.title'), 
+      description: t('dashboard.quickActions.disease.description'), 
+      icon: Camera, 
+      action: () => navigate("/detection"), 
+      bg: "bg-yellow-50", textColor: "yellow-800", iconColor: "yellow-500" 
+    },
+    { 
+      title: t('dashboard.quickActions.soil.title'), 
+      description: t('dashboard.quickActions.soil.description'), 
+      icon: Beaker, 
+      action: () => navigate("/soil-analysis"), 
+      bg: "bg-blue-50", textColor: "blue-800", iconColor: "blue-600" 
+    },
+    { 
+      // ✅ CHANGED: This now toggles view instead of navigating
+      title: viewMode === 'recent' ? t('dashboard.quickActions.history.title') : "Back to Dashboard", 
+      description: viewMode === 'recent' ? t('dashboard.quickActions.history.description') : "Show less activity", 
+      icon: viewMode === 'recent' ? History : ArrowLeft, 
+      action: toggleHistoryView, 
+      bg: "bg-pink-50", textColor: "red-700", iconColor: "red-500" 
+    },
+  ];
+
   if (loading) {
     return <div className="min-h-screen flex justify-center items-center">{t('dashboard.loading')}</div>;
   }
@@ -80,6 +147,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-5xl mx-auto p-6">
+        
         {/* Farmer Profile Section */}
         <section className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-green-100">
           <h2 className="text-lg font-semibold text-green-800 mb-4 flex items-center gap-2">
@@ -88,15 +156,12 @@ export default function Dashboard() {
           </h2>
           <div className="flex items-center gap-4 mb-6">
             <div className="w-16 h-16 rounded-full bg-green-700 text-white flex items-center justify-center text-xl font-semibold">
-              {/* Initials are now generated from the fetched user's name */}
               {user.name.split(" ").map((n) => n[0]).join("")}
             </div>
             <div>
-              {/* Display the fetched user's name */}
               <h3 className="font-medium text-gray-900">{user.name}</h3>
               <p className="text-gray-600 text-sm flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
-                {/* Display the fetched user's location */}
                 {user.location || t('dashboard.locationNotSet')}
               </p>
             </div>
@@ -136,26 +201,52 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Recent Activity Section */}
+        {/* Recent Activity / Full History Section */}
         <div className="bg-white rounded-lg shadow-md p-6 mt-8">
-          <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
-            <Activity className="h-5 w-5 text-green-600" /> {t('dashboard.recentActivityTitle')}
-          </h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="flex items-center gap-2 text-lg font-semibold">
+              <Activity className="h-5 w-5 text-green-600" /> 
+              {viewMode === 'recent' ? t('dashboard.recentActivityTitle') : "Full Activity History"}
+            </h3>
+            
+            {/* Optional: Small View All link if in recent mode */}
+            {viewMode === 'recent' && historyData.length > 3 && (
+              <button onClick={toggleHistoryView} className="text-sm text-green-600 hover:underline">
+                View All
+              </button>
+            )}
+          </div>
+
           <div className="space-y-4">
-            {recentActivity.length > 0 ? recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-center gap-4 bg-green-50 p-3 rounded-md">
-                <div className={`p-2 rounded-full ${activity.type === "crop" ? "bg-green-600" : "bg-yellow-500"}`}>
-                  {activity.type === "crop" ? <Wheat className="h-4 w-4 text-white" /> : <Leaf className="h-4 w-4 text-white" />}
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-medium">{activity.title}</h4>
-                  <p className="text-sm text-gray-500">{activity.result}</p>
-                </div>
-                <div className="text-sm text-gray-400">{activity.date}</div>
+            {loadingHistory ? (
+              <p className="text-gray-500 text-center py-4">Loading history...</p>
+            ) : displayedActivity.length > 0 ? (
+              displayedActivity.map((item, index) => {
+                const display = getHistoryItemDisplay(item);
+                return (
+                  <div key={item.id || index} className="flex items-center gap-4 bg-green-50 p-3 rounded-md hover:bg-green-100 transition-colors">
+                    <div className={`p-2 rounded-full ${display.bg}`}>
+                      <display.icon className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">{display.title}</h4>
+                      <p className="text-sm text-gray-500">{display.result}</p>
+                    </div>
+                    <div className="text-sm text-gray-400 whitespace-nowrap">
+                      {display.date}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>{t('dashboard.noActivity')}</p>
+                {viewMode === 'history' && <p className="text-xs mt-1">Go detect some diseases or get crop recommendations!</p>}
               </div>
-            )) : <p className="text-gray-500">{t('dashboard.noActivity')}</p>}
+            )}
           </div>
         </div>
+
       </main>
     </div>
   );

@@ -29,16 +29,41 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthEntryPoint unauthorizedHandler;
 
-    @Bean
+    // @Bean
+    // public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    //     http
+    //         .csrf(csrf -> csrf.disable())
+    //         .cors(cors -> cors.configurationSource(corsConfigurationSource())) // FIXED: Use proper CORS
+    //         .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
+    //         .sessionManagement(session -> 
+    //             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+    //         .authorizeHttpRequests(auth -> auth
+    //             .requestMatchers("/api/auth/**", "/h2-console/**").permitAll() // Allow H2 console
+    //             .anyRequest().authenticated()
+    //         );
+        
+    //     // Allow H2 console to work properly
+    //     http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+        
+    //     http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+    //     return http.build();
+    // }
+@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // FIXED: Use proper CORS
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/h2-console/**").permitAll() // Allow H2 console
+                // 1. Allow Auth (Login/Register) & H2 Console
+                .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
+                
+                // ✅ 2. ADD THIS LINE: Allow your ML Endpoints explicitly
+                .requestMatchers("/api/recommend", "/api/detect").permitAll()
+                
+                // 3. Everything else requires a token
                 .anyRequest().authenticated()
             );
         
@@ -48,7 +73,6 @@ public class SecurityConfig {
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

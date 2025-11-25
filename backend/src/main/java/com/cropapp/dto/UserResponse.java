@@ -9,10 +9,10 @@ import lombok.Builder;
 @Builder
 @NoArgsConstructor
  @AllArgsConstructor
-public class UserProfileResponse {
+public class UserResponse {
     private Long id;
     private String name;
     private String email;
     private String location;
-    private String token; // JWT token for login response
+    private String token;
 }

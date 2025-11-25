@@ -1,5 +1,5 @@
 
-export function OurServices() {
+export default function OurServices() {
   return (
     <div className="py-20 bg-gray-50"> {/* Light background */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
