@@ -1,0 +1,4 @@
+venv/
+ml-api/venv/
+backend/venv/
+frontend/venv/
